@@ -3,9 +3,9 @@
     <div class="header">
       <h1>Banco UN</h1>
       <nav>
-        <button v-if="is_auth">Inicio</button>
-        <button v-if="is_auth">Cuenta</button>
-        <button v-if="is_auth">Cerrar Sesión</button>
+        <button v-if="is_auth" v-on:click="loadHome">Inicio</button>
+        <button v-if="is_auth" v-on:click="loadAccount">Cuenta</button>
+        <button v-if="is_auth" v-on:click="logOut">Cerrar Sesión</button>
         <button v-if="!is_auth" v-on:click="loadLogIn">Iniciar Sesión</button>
         <button v-if="!is_auth" v-on:click="loadSignUp">Registrarse</button>
       </nav>
@@ -14,6 +14,7 @@
       <router-view
         v-on:completedLogIn="completedLogIn"
         v-on:completedSignUp="completedSignUp"
+        v-on:logOut="logOut"
       >
       </router-view>
     </div>
@@ -33,7 +34,9 @@ export default {
   components: {},
   methods: {
     verifyAuth: function () {
+      this.is_auth = localStorage.getItem("isAuth") || false;
       if (!this.is_auth) this.$router.push({ name: "logIn" });
+      else this.$router.push({ name: "home" });
     },
     loadLogIn: function () {
       this.$router.push({ name: "logIn" });
@@ -42,10 +45,27 @@ export default {
       this.$router.push({ name: "signUp" });
     },
     completedLogIn: function (data) {
-      console.log(data);
+      localStorage.setItem("isAuth", true);
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("token_access", data.token_access);
+      localStorage.setItem("token_refresh", data.token_refresh);
+      alert("Autenticación Exitosa");
+      this.verifyAuth();
     },
     completedSignUp: function (data) {
-      console.log(data);
+      alert("Registro Exitoso");
+      this.completedLogIn(data);
+    },
+    loadHome: function () {
+      this.$router.push({ name: "home" });
+    },
+    logOut: function () {
+      localStorage.clear();
+      alert("Sesión Cerrada");
+      this.verifyAuth();
+    },
+    loadAccount: function () {
+      this.$router.push({ name: "account" });
     },
   },
   created: function () {
